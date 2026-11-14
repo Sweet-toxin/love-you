@@ -6,92 +6,249 @@
 <title>Любовь в конверте</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 20px; }
-  .container { width: 100%; max-width: 560px; background: rgba(255,255,255,0.06); backdrop-filter: blur(12px); border-radius: 24px; padding: 32px 24px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-  h1 { text-align: center; color: #ffb3c6; font-size: 1.6rem; margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; }
+  body {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 20px;
+  }
+  
+  /* ===== ФОРМА СОЗДАНИЯ ===== */
+  .container {
+    width: 100%; max-width: 560px; background: rgba(255,255,255,0.06); backdrop-filter: blur(12px);
+    border-radius: 24px; padding: 32px 24px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  h1 { text-align: center; color: #ffb3c6; font-size: 1.6rem; margin-bottom: 6px; font-weight: 600; }
   .subtitle { text-align: center; color: rgba(255,255,255,0.5); font-size: 0.82rem; margin-bottom: 24px; }
   label { display: block; color: rgba(255,255,255,0.75); font-size: 0.8rem; margin: 14px 0 6px; font-weight: 500; }
-  input, textarea { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #fff; font-size: 0.95rem; outline: none; transition: border 0.2s; font-family: inherit; }
-  input:focus, textarea:focus { border-color: #ffb3c6; }
+  input, textarea, select {
+    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06); color: #fff; font-size: 0.95rem; outline: none; font-family: inherit;
+  }
+  input:focus, textarea:focus, select:focus { border-color: #ffb3c6; }
   textarea { resize: vertical; min-height: 80px; }
-  .btn { width: 100%; padding: 14px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, opacity 0.2s; margin-top: 18px; }
+  select option { background: #16213e; color: #fff; }
+  .color-row { display: flex; align-items: center; gap: 10px; }
+  .color-row input[type="color"] { width: 50px; height: 40px; padding: 0; cursor: pointer; border: none; background: transparent; }
+  .btn {
+    width: 100%; padding: 14px; border: none; border-radius: 14px; font-size: 1rem;
+    font-weight: 600; cursor: pointer; transition: transform 0.15s, opacity 0.2s; margin-top: 18px;
+  }
   .btn:active { transform: scale(0.97); }
   .btn-primary { background: linear-gradient(135deg, #ff6b9d, #c44569); color: #fff; }
   .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
-  .link-box { margin-top: 16px; padding: 14px; background: rgba(0,0,0,0.25); border-radius: 12px; word-break: break-all; font-size: 0.78rem; color: #ffb3c6; display: none; border: 1px dashed rgba(255,179,198,0.4); }
+  .link-box {
+    margin-top: 16px; padding: 14px; background: rgba(0,0,0,0.25); border-radius: 12px;
+    word-break: break-all; font-size: 0.78rem; color: #ffb3c6; display: none; border: 1px dashed rgba(255,179,198,0.4);
+  }
   .link-box.show { display: block; }
-  .status { text-align: center; margin-top: 12px; font-size: 0.82rem; color: rgba(255,255,255,0.55); min-height: 1.2em; }
-  .scene { display: none; flex-direction: column; align-items: center; gap: 24px; width: 100%; max-width: 560px; animation: fadeIn 0.6s ease; }
-  .scene.active { display: flex; }
+  .status { text-align: center; margin-top: 12px; font-size: 0.82rem; color: rgba(255,255,255,0.55); }
+
+  /* ===== ЭКРАН ЗАГРУЗКИ ===== */
+  #loadingScreen {
+    display: none; position: fixed; inset: 0; background: #1a1a2e; z-index: 100;
+    flex-direction: column; align-items: center; justify-content: center; color: #fff;
+  }
+  .loader-heart {
+    font-size: 4rem; animation: beat 1s infinite alternate; margin-bottom: 20px;
+  }
+  @keyframes beat { from { transform: scale(1); } to { transform: scale(1.2); } }
+
+  /* ===== СЦЕНА С КОНВЕРТОМ ===== */
+  .scene { display: none; flex-direction: column; align-items: center; gap: 20px; width: 100%; max-width: 560px; }
+  .scene.active { display: flex; animation: fadeIn 0.6s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  .envelope-wrap { cursor: pointer; perspective: 1000px; width: 280px; height: 200px; position: relative; margin: 20px auto; transition: transform 0.2s; }
-  .envelope-wrap:active { transform: scale(0.97); }
-  .env-body { position: absolute; bottom: 0; width: 100%; height: 160px; background: linear-gradient(145deg, #e8456b, #c23152); border-radius: 8px 8px 16px 16px; box-shadow: 0 12px 40px rgba(232,69,107,0.35); }
-  .env-flap { position: absolute; top: 0; width: 100%; height: 100px; background: linear-gradient(180deg, #d63a5e, #e8456b); clip-path: polygon(0 0, 50% 100%, 100% 0); transform-origin: top center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.3s; z-index: 4; border-radius: 8px 8px 0 0; }
-  .envelope-wrap.open .env-flap { transform: rotateX(180deg); z-index: 1; }
-  .letter-preview { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(30px); width: 88%; height: 120px; background: #fff8f0; border-radius: 6px; z-index: 3; transition: transform 0.6s 0.25s cubic-bezier(0.4, 0, 0.2, 1); padding: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
-  .envelope-wrap.open .letter-preview { transform: translateX(-50%) translateY(-40px); z-index: 5; }
-  .letter-preview .heart-icon { font-size: 1.4rem; text-align: center; line-height: 1; }
-  .letter-preview .preview-text { font-size: 0.65rem; color: #8b5a5a; text-align: center; margin-top: 6px; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
-  .hint { color: rgba(255,255,255,0.5); font-size: 0.85rem; text-align: center; animation: pulse 2s infinite; }
+
+  .envelope-wrap {
+    cursor: pointer; perspective: 1000px; width: 300px; height: 220px; position: relative; margin: 20px auto;
+    transition: transform 0.2s;
+  }
+  .envelope-wrap:active { transform: scale(0.98); }
+
+  .env-body {
+    position: absolute; bottom: 0; width: 100%; height: 170px;
+    border-radius: 8px 8px 16px 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.4); transition: background 0.3s;
+  }
+  .env-flap {
+    position: absolute; top: 0; width: 100%; height: 110px;
+    clip-path: polygon(0 0, 50% 100%, 100% 0); transform-origin: top center;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.4s, background 0.3s;
+    z-index: 4; border-radius: 8px 8px 0 0;
+  }
+
+  /* Стили конвертов */
+  .env-classic .env-body { background: linear-gradient(145deg, #e8456b, #c23152); }
+  .env-classic .env-flap { background: linear-gradient(180deg, #d63a5e, #e8456b); }
+  .env-classic .seal-heart { color: #c23152; background: #ffb3c6; }
+
+  .env-elegant .env-body { background: linear-gradient(145deg, #2c3e50, #1a252f); }
+  .env-elegant .env-flap { background: linear-gradient(180deg, #34495e, #2c3e50); }
+  .env-elegant .seal-heart { color: #1a252f; background: #f1c40f; }
+
+  .env-sweet .env-body { background: linear-gradient(145deg, #ff9a9e, #fecfef); }
+  .env-sweet .env-flap { background: linear-gradient(180deg, #fbc2eb, #ff9a9e); }
+  .env-sweet .seal-heart { color: #ff9a9e; background: #fff; }
+
+  /* ===== СУРГУЧНАЯ ПЕЧАТЬ ===== */
+  .seal-heart {
+    position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
+    width: 50px; height: 50px; border-radius: 50%; z-index: 5;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  /* Трещины */
+  .seal-heart.crack-1::after, .seal-heart.crack-2::after {
+    content: ''; position: absolute; top: 0; left: 50%; width: 2px; height: 100%;
+    background: rgba(0,0,0,0.5); transform: translateX(-50%) rotate(15deg);
+  }
+  .seal-heart.crack-2::before {
+    content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 2px;
+    background: rgba(0,0,0,0.5); transform: translateY(-50%) rotate(-20deg);
+  }
+  /* Разлом */
+  .seal-heart.broken {
+    opacity: 0; transform: translateX(-50%) scale(1.5) rotate(45deg); pointer-events: none;
+  }
+
+  /* Открытие конверта */
+  .envelope-wrap.open .env-flap {
+    transform: rotateX(180deg); z-index: 1;
+  }
+
+  /* ===== ПИСЬМО (СЛОЖЕННОЕ И РАЗВЕРНУТОЕ) ===== */
+  .letter-wrap {
+    position: absolute; bottom: 15px; left: 50%;
+    transform: translateX(-50%) translateY(30px);
+    width: 90%; height: 120px; z-index: 3;
+    transition: transform 0.6s 0.4s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.5s, height 0.4s, width 0.4s;
+    cursor: pointer; border-radius: 6px;
+  }
+  .envelope-wrap.open .letter-wrap {
+    transform: translateX(-50%) translateY(-60px); z-index: 5;
+  }
+
+  /* Развернутое письмо на весь экран */
+  .letter-wrap.unfolded {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw; max-width: 500px; height: auto; min-height: 60vh;
+    z-index: 50; cursor: default;
+    background: #fffdf8; border-radius: 16px; padding: 30px;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.8), 0 0 0 100vmax rgba(0,0,0,0.6);
+    display: flex; flex-direction: column; transition: all 0.6s ease;
+  }
+
+  .letter-paper {
+    width: 100%; height: 100%; background: #fff8f0; border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 15px; overflow: hidden;
+  }
+  .letter-wrap.unfolded .letter-paper {
+    background: transparent; box-shadow: none; padding: 0; overflow-y: auto;
+  }
+
+  .heart-icon { font-size: 1.5rem; text-align: center; line-height: 1; }
+  .letter-wrap.unfolded .heart-icon { display: none; }
+
+  /* Текст внутри письма */
+  .letter-content {
+    display: none; font-size: 1.1rem; line-height: 1.6; margin-top: 15px;
+    white-space: pre-wrap; font-family: 'Georgia', serif;
+  }
+  .letter-wrap.unfolded .letter-content { display: block; }
+  
+  .letter-to { font-weight: bold; font-size: 1.3rem; margin-bottom: 15px; display: block; }
+  .letter-from { font-style: italic; text-align: right; margin-top: 20px; display: block; opacity: 0.8; }
+  
+  .cursor { display: inline-block; width: 2px; height: 1.1em; background: currentColor; animation: blink 1s infinite; vertical-align: bottom; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  .hint { color: rgba(255,255,255,0.6); font-size: 0.85rem; text-align: center; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
-  .full-card { display: none; flex-direction: column; align-items: center; gap: 18px; width: 100%; animation: fadeIn 0.8s ease; }
-  .full-card.show { display: flex; }
-  .card-canvas-wrap { position: relative; width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 50px rgba(0,0,0,0.5); }
-  #cardCanvas { display: block; width: 100%; height: auto; border-radius: 20px; }
-  .music-indicator { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.6); font-size: 0.78rem; }
-  .music-indicator .dot { width: 6px; height: 6px; background: #ffb3c6; border-radius: 50%; animation: blink 1s infinite alternate; }
-  @keyframes blink { from { opacity: 0.2; } to { opacity: 1; } }
-  .action-row { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
-  .action-row .btn { flex: 1; min-width: 140px; margin-top: 0; font-size: 0.88rem; padding: 12px; }
-  .back-link { color: rgba(255,255,255,0.4); font-size: 0.78rem; cursor: pointer; text-decoration: underline; margin-top: 8px; }
-  .back-link:hover { color: #ffb3c6; }
-  @media (max-width: 480px) { .envelope-wrap { width: 240px; height: 180px; } .env-body { height: 140px; } .env-flap { height: 90px; } .letter-preview { height: 105px; } .container { padding: 24px 18px; } }
+
+  .action-row { display: flex; gap: 10px; width: 100%; margin-top: 10px; position: relative; z-index: 60; }
+  .action-row .btn { flex: 1; margin-top: 0; font-size: 0.88rem; padding: 12px; }
+  
+  @media (max-width: 480px) {
+    .envelope-wrap { width: 260px; height: 190px; }
+    .env-body { height: 145px; }
+    .env-flap { height: 95px; }
+    .seal-heart { top: 75px; width: 45px; height: 45px; }
+    .letter-wrap { height: 100px; }
+    .letter-wrap.unfolded { min-height: 70vh; }
+    .container { padding: 24px 18px; }
+  }
 </style>
 </head>
 <body>
 
+<!-- ЭКРАН ЗАГРУЗКИ -->
+<div id="loadingScreen">
+  <div class="loader-heart">💖</div>
+  <h2 style="color: #ffb3c6; margin-bottom: 10px;">Упаковываем ваши чувства...</h2>
+  <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Пожалуйста, подождите</p>
+</div>
+
+<!-- ФОРМА СОЗДАНИЯ -->
 <div class="container" id="createPanel">
   <h1>💌 Любовь в конверте</h1>
   <p class="subtitle">Создайте открытку и отправьте ссылкой</p>
+  
   <label>Кому (имя получателя)</label>
   <input type="text" id="toName" placeholder="Например: Ане" maxlength="40">
+  
   <label>От кого (ваше имя)</label>
   <input type="text" id="fromName" placeholder="Например: от Максима" maxlength="40">
+  
   <label>Текст поздравления</label>
-  <textarea id="message" placeholder="Напишите что-то тёплое..." maxlength="300"></textarea>
+  <textarea id="message" placeholder="Напишите что-то тёплое..." maxlength="500"></textarea>
+  
+  <label>Цвет текста в письме</label>
+  <div class="color-row">
+    <input type="color" id="textColor" value="#333333">
+    <span style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">Выберите цвет чернил</span>
+  </div>
+
+  <label>Форма / Стиль конверта</label>
+  <select id="envelopeStyle">
+    <option value="env-classic">Классический красный (Сургуч)</option>
+    <option value="env-elegant">Элегантный синий (Золото)</option>
+    <option value="env-sweet">Нежный розовый (Светлый)</option>
+  </select>
+
   <label>Ссылка на музыку (MP3, прямой URL)</label>
   <input type="url" id="musicUrl" placeholder="https://example.com/song.mp3">
+
   <button class="btn btn-primary" id="generateBtn">Создать открытку</button>
   <div class="link-box" id="linkBox"></div>
   <div class="status" id="status"></div>
 </div>
 
+<!-- СЦЕНА С КОНВЕРТОМ -->
 <div class="scene" id="envelopeScene">
   <h1 style="color:#ffb3c6; font-size:1.3rem;">У вас открытка 💌</h1>
+  
   <div class="envelope-wrap" id="envelopeWrap">
     <div class="env-body"></div>
     <div class="env-flap"></div>
-    <div class="letter-preview">
-      <div class="heart-icon">💗</div>
-      <div class="preview-text" id="previewText"></div>
+    <div class="seal-heart" id="seal">❤</div>
+    
+    <div class="letter-wrap" id="letterWrap">
+      <div class="letter-paper">
+        <div class="heart-icon">💗</div>
+        <div class="letter-content" id="letterContent">
+          <!-- Текст будет вставлен через JS -->
+        </div>
+      </div>
     </div>
   </div>
-  <div class="hint">Нажмите на конверт, чтобы открыть</div>
+  
+  <div class="hint" id="hintText">Нажмите на печать, чтобы сломать её (3 клика)</div>
 </div>
 
-<div class="full-card" id="fullCard">
-  <div class="card-canvas-wrap">
-    <canvas id="cardCanvas" width="1080" height="1350"></canvas>
-  </div>
-  <div class="music-indicator" id="musicIndicator" style="display:none;">
-    <span class="dot"></span> Музыка играет
-  </div>
-  <div class="action-row">
-    <button class="btn btn-primary" id="downloadBtn">💾 Скачать картинку</button>
-    <button class="btn btn-secondary" id="copyLinkBtn">🔗 Скопировать ссылку</button>
-  </div>
-  <div class="back-link" id="backLink">← Создать свою открытку</div>
+<!-- ПАНЕЛЬ ДЕЙСТВИЙ (ПОЯВЛЯЕТСЯ ПОСЛЕ ОТКРЫТИЯ) -->
+<div class="action-row" id="actionRow" style="display: none; max-width: 560px; margin: 0 auto; margin-top: 20px;">
+  <button class="btn btn-primary" id="downloadBtn">💾 Скачать фото</button>
+  <button class="btn btn-secondary" id="copyLinkBtn">🔗 Скопировать ссылку</button>
 </div>
 
 <audio id="bgMusic" loop preload="none"></audio>
@@ -101,27 +258,34 @@
   'use strict';
 
   const createPanel = document.getElementById('createPanel');
+  const loadingScreen = document.getElementById('loadingScreen');
   const envelopeScene = document.getElementById('envelopeScene');
-  const fullCard = document.getElementById('fullCard');
+  const actionRow = document.getElementById('actionRow');
+  const envelopeWrap = document.getElementById('envelopeWrap');
+  const seal = document.getElementById('seal');
+  const letterWrap = document.getElementById('letterWrap');
+  const letterContent = document.getElementById('letterContent');
+  const hintText = document.getElementById('hintText');
+  const bgMusic = document.getElementById('bgMusic');
+  
   const toName = document.getElementById('toName');
   const fromName = document.getElementById('fromName');
   const message = document.getElementById('message');
+  const textColor = document.getElementById('textColor');
+  const envelopeStyle = document.getElementById('envelopeStyle');
   const musicUrl = document.getElementById('musicUrl');
+  
   const generateBtn = document.getElementById('generateBtn');
   const linkBox = document.getElementById('linkBox');
   const status = document.getElementById('status');
-  const envelopeWrap = document.getElementById('envelopeWrap');
-  const previewText = document.getElementById('previewText');
-  const canvas = document.getElementById('cardCanvas');
-  const ctx = canvas.getContext('2d');
-  const bgMusic = document.getElementById('bgMusic');
-  const musicIndicator = document.getElementById('musicIndicator');
   const downloadBtn = document.getElementById('downloadBtn');
   const copyLinkBtn = document.getElementById('copyLinkBtn');
-  const backLink = document.getElementById('backLink');
 
   let currentData = null;
+  let clickCount = 0;
+  let typingInterval = null;
 
+  // Кодирование/Декодирование данных
   function encodeData(obj) {
     const json = JSON.stringify(obj);
     const bytes = new TextEncoder().encode(json);
@@ -147,87 +311,160 @@
     return decodeData(hash);
   }
 
+  // Генерация ссылки
   generateBtn.addEventListener('click', function() {
     const data = {
       to: toName.value.trim() || 'Любимому человеку',
       from: fromName.value.trim() || 'От всего сердца',
       msg: message.value.trim() || 'Ты — моё самое любимое чудо на свете.',
+      color: textColor.value,
+      style: envelopeStyle.value,
       music: musicUrl.value.trim() || ''
     };
 
     const encoded = encodeData(data);
     
-    // ОБНОВЛЕНИЕ: Меняем адресную строку, чтобы ссылку можно было копировать прямо из браузера
-    history.pushState(null, null, '#' + encoded);
+    // Имитация создания (5 секунд)
+    createPanel.style.display = 'none';
+    loadingScreen.style.display = 'flex';
     
-    const url = location.href;
-    linkBox.textContent = url;
-    linkBox.classList.add('show');
-    status.textContent = 'Ссылка готова! Скопируйте и отправьте.';
-
-    navigator.clipboard.writeText(url).then(() => {
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+      history.pushState(null, null, '#' + encoded);
+      
+      const url = location.href;
+      linkBox.textContent = url;
+      linkBox.classList.add('show');
       status.textContent = 'Ссылка скопирована в буфер обмена ✓';
-    }).catch(() => {});
-
-    showEnvelope(data);
+      navigator.clipboard.writeText(url).catch(() => {});
+      
+      showEnvelope(data);
+    }, 5000); // 5 секунд загрузки
   });
 
+  // Показ конверта
   function showEnvelope(data) {
     currentData = data;
-    createPanel.style.display = 'none';
+    clickCount = 0;
+    seal.className = 'seal-heart';
+    envelopeWrap.className = 'envelope-wrap ' + data.style;
+    letterWrap.classList.remove('unfolded');
+    actionRow.style.display = 'none';
     envelopeScene.classList.add('active');
-    fullCard.classList.remove('show');
-    envelopeWrap.classList.remove('open');
-    previewText.textContent = data.msg.substring(0, 60) + (data.msg.length > 60 ? '…' : '');
+    hintText.textContent = 'Нажмите на печать (3 клика)';
+    hintText.style.display = 'block';
+
     if (data.music) {
       bgMusic.src = data.music;
       bgMusic.load();
     }
   }
 
-  envelopeWrap.addEventListener('click', function() {
-    if (envelopeWrap.classList.contains('open')) return;
-    envelopeWrap.classList.add('open');
-
-    if (currentData && currentData.music) {
-      bgMusic.play().then(() => {
-        musicIndicator.style.display = 'flex';
-      }).catch(() => {});
+  // Обработка клика по конверту/печати
+  envelopeWrap.addEventListener('click', function(e) {
+    // Если кликнули на само письмо
+    if (e.target.closest('.letter-wrap')) {
+      if (!letterWrap.classList.contains('unfolded')) {
+        letterWrap.classList.add('unfolded');
+        hintText.style.display = 'none';
+        setTimeout(() => startTyping(currentData), 800); // Начинаем печатать после разворота
+      }
+      return;
     }
 
-    setTimeout(() => {
-      envelopeScene.classList.remove('active');
-      fullCard.classList.add('show');
-      drawCard(currentData);
-    }, 900);
+    // Логика ломания печати
+    if (clickCount < 3) {
+      clickCount++;
+      if (clickCount === 1) {
+        seal.classList.add('crack-1');
+        hintText.textContent = 'Ещё раз...';
+      } else if (clickCount === 2) {
+        seal.classList.add('crack-2');
+        hintText.textContent = 'И последний раз!';
+      } else if (clickCount === 3) {
+        seal.classList.add('broken');
+        envelopeWrap.classList.add('open');
+        hintText.textContent = 'Нажмите на письмо, чтобы развернуть';
+        
+        // Запуск музыки
+        if (currentData && currentData.music) {
+          bgMusic.play().catch(() => {});
+        }
+      }
+    }
   });
 
-  function drawCard(data) {
-    const W = canvas.width;
-    const H = canvas.height;
-    const gradient = ctx.createLinearGradient(0, 0, W, H);
-    gradient.addColorStop(0, '#1a1a2e'); gradient.addColorStop(0.5, '#16213e'); gradient.addColorStop(1, '#0f3460');
-    ctx.fillStyle = gradient; ctx.fillRect(0, 0, W, H);
-    ctx.strokeStyle = 'rgba(255,179,198,0.3)'; ctx.lineWidth = 3; ctx.strokeRect(40, 40, W - 80, H - 80);
-    ctx.font = '120px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('💗', W/2, H * 0.18);
-    ctx.fillStyle = '#ffb3c6'; ctx.font = 'bold 48px "Segoe UI", system-ui, sans-serif'; ctx.fillText(data.to, W/2, H * 0.30);
-    ctx.strokeStyle = 'rgba(255,179,198,0.25)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(W * 0.2, H * 0.36); ctx.lineTo(W * 0.8, H * 0.36); ctx.stroke();
-    ctx.fillStyle = '#ffffff'; ctx.font = '36px "Segoe UI", system-ui, sans-serif';
-    const maxWidth = W * 0.75; const lineHeight = 52; const words = data.msg.split(' '); let lines = []; let currentLine = '';
-    for (const word of words) { const test = currentLine ? currentLine + ' ' + word : word; if (ctx.measureText(test).width > maxWidth && currentLine) { lines.push(currentLine); currentLine = word; } else { currentLine = test; } }
-    if (currentLine) lines.push(currentLine);
-    const textStartY = H * 0.48 - (lines.length * lineHeight) / 2 + lineHeight / 2;
-    lines.forEach((line, i) => { ctx.fillText(line, W/2, textStartY + i * lineHeight); });
-    ctx.fillStyle = 'rgba(255,179,198,0.8)'; ctx.font = 'italic 32px "Segoe UI", system-ui, sans-serif'; ctx.fillText(data.from, W/2, H * 0.82);
-    ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '24px "Segoe UI", system-ui, sans-serif'; ctx.fillText('Любовь в конверте', W/2, H * 0.92);
+  // Эффект печатной машинки
+  function startTyping(data) {
+    letterContent.innerHTML = `<span class="letter-to">${data.to},</span>`;
+    letterContent.style.color = data.color;
+    
+    const msgText = data.msg;
+    const textContainer = document.createElement('span');
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    letterContent.appendChild(textContainer);
+    letterContent.appendChild(cursor);
+
+    let i = 0;
+    clearInterval(typingInterval);
+    typingInterval = setInterval(() => {
+      if (i < msgText.length) {
+        if (msgText.charAt(i) === '\n') {
+          textContainer.innerHTML += '<br>';
+        } else {
+          textContainer.innerHTML += msgText.charAt(i);
+        }
+        i++;
+      } else {
+        clearInterval(typingInterval);
+        cursor.remove();
+        // Добавляем подпись
+        const fromSpan = document.createElement('span');
+        fromSpan.className = 'letter-from';
+        fromSpan.textContent = data.from;
+        letterContent.appendChild(fromSpan);
+        
+        // Показываем кнопки действий
+        actionRow.style.display = 'flex';
+      }
+    }, 50); // Скорость печати (50мс на символ)
   }
 
+  // Кнопка "Скачать картинку" (генерация на лету)
   downloadBtn.addEventListener('click', function() {
     if (!currentData) return;
+    
+    // Создаем временный canvas для генерации красивого фото
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080; canvas.height = 1350;
+    const ctx = canvas.getContext('2d');
+    
+    const gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
+    gradient.addColorStop(0, '#1a1a2e'); gradient.addColorStop(1, '#0f3460');
+    ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1080, 1350);
+    
+    ctx.strokeStyle = 'rgba(255,179,198,0.3)'; ctx.lineWidth = 3; ctx.strokeRect(40, 40, 1000, 1270);
+    ctx.font = '120px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('💗', 540, 250);
+    
+    ctx.fillStyle = currentData.color; ctx.font = 'bold 48px "Georgia", serif'; ctx.fillText(currentData.to, 540, 400);
+    ctx.beginPath(); ctx.moveTo(200, 480); ctx.lineTo(880, 480); ctx.stroke();
+    
+    ctx.font = '36px "Georgia", serif';
+    const words = currentData.msg.split(' '); let lines = []; let currentLine = '';
+    for (const word of words) { const test = currentLine ? currentLine + ' ' + word : word; if (ctx.measureText(test).width > 800 && currentLine) { lines.push(currentLine); currentLine = word; } else { currentLine = test; } }
+    if (currentLine) lines.push(currentLine);
+    lines.forEach((line, i) => { ctx.fillText(line, 540, 650 + i * 60); });
+    
+    ctx.fillStyle = currentData.color; ctx.font = 'italic 32px "Georgia", serif'; ctx.fillText(currentData.from, 540, 1150);
+    
     const link = document.createElement('a');
-    link.download = 'love-card.png'; link.href = canvas.toDataURL('image/png'); link.click();
+    link.download = 'love-card.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
   });
 
+  // Копирование ссылки
   copyLinkBtn.addEventListener('click', function() {
     navigator.clipboard.writeText(location.href).then(() => {
       const original = copyLinkBtn.textContent;
@@ -236,27 +473,19 @@
     }).catch(() => { prompt('Скопируйте ссылку:', location.href); });
   });
 
-  backLink.addEventListener('click', function() {
-    history.pushState(null, null, window.location.pathname);
-    createPanel.style.display = 'block';
-    envelopeScene.classList.remove('active');
-    fullCard.classList.remove('show');
-  });
-
   function init() {
     const data = getDataFromHash();
     if (data) {
+      createPanel.style.display = 'none';
       showEnvelope(data);
     } else {
       createPanel.style.display = 'block';
       envelopeScene.classList.remove('active');
-      fullCard.classList.remove('show');
+      actionRow.style.display = 'none';
     }
   }
 
-  // ОБНОВЛЕНИЕ: Слушаем изменение хэша (если ссылку вставили в ту же вкладку)
   window.addEventListener('hashchange', init);
-
   init();
 })();
 </script>
