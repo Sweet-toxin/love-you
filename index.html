@@ -7,7 +7,7 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 20px;
   }
@@ -48,13 +48,11 @@
     display: none; position: fixed; inset: 0; background: #1a1a2e; z-index: 100;
     flex-direction: column; align-items: center; justify-content: center; color: #fff;
   }
-  .loader-heart {
-    font-size: 4rem; animation: beat 1s infinite alternate; margin-bottom: 20px;
-  }
+  .loader-heart { font-size: 4rem; animation: beat 1s infinite alternate; margin-bottom: 20px; }
   @keyframes beat { from { transform: scale(1); } to { transform: scale(1.2); } }
 
   /* ===== СЦЕНА С КОНВЕРТОМ ===== */
-  .scene { display: none; flex-direction: column; align-items: center; gap: 20px; width: 100%; max-width: 560px; }
+  .scene { display: none; flex-direction: column; align-items: center; gap: 20px; width: 100%; max-width: 560px; position: relative; }
   .scene.active { display: flex; animation: fadeIn 0.6s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -96,8 +94,11 @@
     font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-  /* Трещины */
-  .seal-heart.crack-1::after, .seal-heart.crack-2::after {
+  .seal-heart.crack-1::after {
+    content: ''; position: absolute; top: 0; left: 50%; width: 2px; height: 100%;
+    background: rgba(0,0,0,0.5); transform: translateX(-50%) rotate(15deg);
+  }
+  .seal-heart.crack-2::after {
     content: ''; position: absolute; top: 0; left: 50%; width: 2px; height: 100%;
     background: rgba(0,0,0,0.5); transform: translateX(-50%) rotate(15deg);
   }
@@ -105,7 +106,6 @@
     content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 2px;
     background: rgba(0,0,0,0.5); transform: translateY(-50%) rotate(-20deg);
   }
-  /* Разлом */
   .seal-heart.broken {
     opacity: 0; transform: translateX(-50%) scale(1.5) rotate(45deg); pointer-events: none;
   }
@@ -115,16 +115,16 @@
     transform: rotateX(180deg); z-index: 1;
   }
 
-  /* ===== ПИСЬМО (СЛОЖЕННОЕ И РАЗВЕРНУТОЕ) ===== */
+  /* ===== ПИСЬМО ===== */
   .letter-wrap {
     position: absolute; bottom: 15px; left: 50%;
     transform: translateX(-50%) translateY(30px);
-    width: 90%; height: 120px; z-index: 3;
+    width: 90%; height: 120px; z-index: 3; pointer-events: none; /* Отключаем клики до открытия */
     transition: transform 0.6s 0.4s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.5s, height 0.4s, width 0.4s;
-    cursor: pointer; border-radius: 6px;
+    border-radius: 6px;
   }
   .envelope-wrap.open .letter-wrap {
-    transform: translateX(-50%) translateY(-60px); z-index: 5;
+    transform: translateX(-50%) translateY(-60px); z-index: 5; pointer-events: auto; cursor: pointer;
   }
 
   /* Развернутое письмо на весь экран */
@@ -132,10 +132,13 @@
     position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 90vw; max-width: 500px; height: auto; min-height: 60vh;
-    z-index: 50; cursor: default;
+    z-index: 50; cursor: pointer;
     background: #fffdf8; border-radius: 16px; padding: 30px;
     box-shadow: 0 20px 80px rgba(0,0,0,0.8), 0 0 0 100vmax rgba(0,0,0,0.6);
     display: flex; flex-direction: column; transition: all 0.6s ease;
+  }
+  .letter-wrap.unfolded:hover::after {
+    content: '✕'; position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: #ccc;
   }
 
   .letter-paper {
@@ -149,24 +152,23 @@
   .heart-icon { font-size: 1.5rem; text-align: center; line-height: 1; }
   .letter-wrap.unfolded .heart-icon { display: none; }
 
-  /* Текст внутри письма */
-  .letter-content {
-    display: none; font-size: 1.1rem; line-height: 1.6; margin-top: 15px;
-    white-space: pre-wrap; font-family: 'Georgia', serif;
-  }
+  .letter-content { display: none; font-size: 1.1rem; line-height: 1.6; margin-top: 15px; white-space: pre-wrap; font-family: 'Georgia', serif; }
   .letter-wrap.unfolded .letter-content { display: block; }
-  
   .letter-to { font-weight: bold; font-size: 1.3rem; margin-bottom: 15px; display: block; }
   .letter-from { font-style: italic; text-align: right; margin-top: 20px; display: block; opacity: 0.8; }
-  
   .cursor { display: inline-block; width: 2px; height: 1.1em; background: currentColor; animation: blink 1s infinite; vertical-align: bottom; }
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-  .hint { color: rgba(255,255,255,0.6); font-size: 0.85rem; text-align: center; animation: pulse 2s infinite; }
+  .hint { color: rgba(255,255,255,0.6); font-size: 0.85rem; text-align: center; animation: pulse 2s infinite; min-height: 20px;}
   @keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
 
-  .action-row { display: flex; gap: 10px; width: 100%; margin-top: 10px; position: relative; z-index: 60; }
-  .action-row .btn { flex: 1; margin-top: 0; font-size: 0.88rem; padding: 12px; }
+  /* ===== НИЖНЯЯ ПАНЕЛЬ КНОПОК ===== */
+  .bottom-actions { 
+    display: none; gap: 10px; width: 100%; max-width: 560px; margin-top: 10px; z-index: 60; 
+    position: relative; animation: fadeIn 1s;
+  }
+  .bottom-actions.show { display: flex; }
+  .bottom-actions .btn { flex: 1; margin-top: 0; font-size: 0.88rem; padding: 12px; }
   
   @media (max-width: 480px) {
     .envelope-wrap { width: 260px; height: 190px; }
@@ -185,7 +187,7 @@
 <div id="loadingScreen">
   <div class="loader-heart">💖</div>
   <h2 style="color: #ffb3c6; margin-bottom: 10px;">Упаковываем ваши чувства...</h2>
-  <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Пожалуйста, подождите</p>
+  <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Создаем ссылку (5 сек)</p>
 </div>
 
 <!-- ФОРМА СОЗДАНИЯ -->
@@ -200,7 +202,7 @@
   <input type="text" id="fromName" placeholder="Например: от Максима" maxlength="40">
   
   <label>Текст поздравления</label>
-  <textarea id="message" placeholder="Напишите что-то тёплое..." maxlength="500"></textarea>
+  <textarea id="message" placeholder="Напишите что-то тёплое..." maxlength="600"></textarea>
   
   <label>Цвет текста в письме</label>
   <div class="color-row">
@@ -215,8 +217,9 @@
     <option value="env-sweet">Нежный розовый (Светлый)</option>
   </select>
 
-  <label>Ссылка на музыку (MP3, прямой URL)</label>
-  <input type="url" id="musicUrl" placeholder="https://example.com/song.mp3">
+  <label>Ссылка на музыку</label>
+  <input type="text" id="musicUrl" placeholder="Прямая ссылка MP3 или ссылка на YouTube">
+  <p style="color: rgba(255,255,255,0.4); font-size: 0.7rem; margin-top: 4px;">* Ссылки на Яндекс.Музыку и ВК не поддерживаются напрямую из-за их защиты.</p>
 
   <button class="btn btn-primary" id="generateBtn">Создать открытку</button>
   <div class="link-box" id="linkBox"></div>
@@ -235,23 +238,22 @@
     <div class="letter-wrap" id="letterWrap">
       <div class="letter-paper">
         <div class="heart-icon">💗</div>
-        <div class="letter-content" id="letterContent">
-          <!-- Текст будет вставлен через JS -->
-        </div>
+        <div class="letter-content" id="letterContent"></div>
       </div>
     </div>
   </div>
   
-  <div class="hint" id="hintText">Нажмите на печать, чтобы сломать её (3 клика)</div>
+  <div class="hint" id="hintText">Нажмите на печать (3 клика)</div>
 </div>
 
-<!-- ПАНЕЛЬ ДЕЙСТВИЙ (ПОЯВЛЯЕТСЯ ПОСЛЕ ОТКРЫТИЯ) -->
-<div class="action-row" id="actionRow" style="display: none; max-width: 560px; margin: 0 auto; margin-top: 20px;">
+<!-- НИЖНЯЯ ПАНЕЛЬ КНОПОК (ПОЯВЛЯЕТСЯ ПОСЛЕ ОТКРЫТИЯ) -->
+<div class="bottom-actions" id="actionRow">
   <button class="btn btn-primary" id="downloadBtn">💾 Скачать фото</button>
   <button class="btn btn-secondary" id="copyLinkBtn">🔗 Скопировать ссылку</button>
 </div>
 
 <audio id="bgMusic" loop preload="none"></audio>
+<div id="ytPlayerContainer" style="display:none;"></div>
 
 <script>
 (function() {
@@ -267,6 +269,7 @@
   const letterContent = document.getElementById('letterContent');
   const hintText = document.getElementById('hintText');
   const bgMusic = document.getElementById('bgMusic');
+  const ytPlayerContainer = document.getElementById('ytPlayerContainer');
   
   const toName = document.getElementById('toName');
   const fromName = document.getElementById('fromName');
@@ -284,8 +287,9 @@
   let currentData = null;
   let clickCount = 0;
   let typingInterval = null;
+  let isTypingDone = false;
 
-  // Кодирование/Декодирование данных
+  // Кодирование/Декодирование
   function encodeData(obj) {
     const json = JSON.stringify(obj);
     const bytes = new TextEncoder().encode(json);
@@ -311,6 +315,27 @@
     return decodeData(hash);
   }
 
+  // Воспроизведение музыки
+  function playMusic(url) {
+    if (!url) return;
+    
+    // Проверка на YouTube
+    const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+    const ytMatch = url.match(ytRegex);
+    
+    if (ytMatch && ytMatch[1]) {
+      // Это YouTube - создаем скрытый iframe
+      ytPlayerContainer.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&loop=1&playlist=${ytMatch[1]}" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
+      ytPlayerContainer.style.display = 'block';
+    } else {
+      // Пытаемся воспроизвести как аудиофайл
+      bgMusic.src = url;
+      bgMusic.play().catch(e => {
+        console.log("Ошибка воспроизведения. Ссылка защищена или неверна.");
+      });
+    }
+  }
+
   // Генерация ссылки
   generateBtn.addEventListener('click', function() {
     const data = {
@@ -324,7 +349,6 @@
 
     const encoded = encodeData(data);
     
-    // Имитация создания (5 секунд)
     createPanel.style.display = 'none';
     loadingScreen.style.display = 'flex';
     
@@ -339,40 +363,51 @@
       navigator.clipboard.writeText(url).catch(() => {});
       
       showEnvelope(data);
-    }, 5000); // 5 секунд загрузки
+    }, 5000);
   });
 
   // Показ конверта
   function showEnvelope(data) {
     currentData = data;
     clickCount = 0;
+    isTypingDone = false;
     seal.className = 'seal-heart';
     envelopeWrap.className = 'envelope-wrap ' + data.style;
     letterWrap.classList.remove('unfolded');
-    actionRow.style.display = 'none';
+    letterContent.innerHTML = '';
+    actionRow.classList.remove('show');
     envelopeScene.classList.add('active');
+    
     hintText.textContent = 'Нажмите на печать (3 клика)';
     hintText.style.display = 'block';
 
-    if (data.music) {
-      bgMusic.src = data.music;
-      bgMusic.load();
-    }
+    // Останавливаем предыдущую музыку
+    bgMusic.pause();
+    ytPlayerContainer.innerHTML = '';
+    ytPlayerContainer.style.display = 'none';
   }
 
-  // Обработка клика по конверту/печати
+  // Клик по конверту / письму
   envelopeWrap.addEventListener('click', function(e) {
-    // Если кликнули на само письмо
-    if (e.target.closest('.letter-wrap')) {
-      if (!letterWrap.classList.contains('unfolded')) {
-        letterWrap.classList.add('unfolded');
-        hintText.style.display = 'none';
-        setTimeout(() => startTyping(currentData), 800); // Начинаем печатать после разворота
+    // Если письмо уже открыто на весь экран (клик для закрытия)
+    if (letterWrap.classList.contains('unfolded')) {
+      if (e.target.closest('.letter-wrap')) {
+        letterWrap.classList.remove('unfolded');
       }
       return;
     }
 
-    // Логика ломания печати
+    // Если конверт открыт, но письмо еще не развернуто
+    if (envelopeWrap.classList.contains('open')) {
+      if (e.target.closest('.letter-wrap')) {
+        letterWrap.classList.add('unfolded');
+        hintText.style.display = 'none';
+        setTimeout(() => startTyping(currentData), 800);
+      }
+      return;
+    }
+
+    // Логика ломания печати (пока конверт закрыт)
     if (clickCount < 3) {
       clickCount++;
       if (clickCount === 1) {
@@ -383,13 +418,16 @@
         hintText.textContent = 'И последний раз!';
       } else if (clickCount === 3) {
         seal.classList.add('broken');
-        envelopeWrap.classList.add('open');
-        hintText.textContent = 'Нажмите на письмо, чтобы развернуть';
         
-        // Запуск музыки
-        if (currentData && currentData.music) {
-          bgMusic.play().catch(() => {});
-        }
+        // Небольшая задержка перед открытием конверта
+        setTimeout(() => {
+          envelopeWrap.classList.add('open');
+          hintText.textContent = 'Нажмите на письмо, чтобы прочитать';
+          
+          if (currentData && currentData.music) {
+            playMusic(currentData.music);
+          }
+        }, 200);
       }
     }
   });
@@ -419,23 +457,25 @@
       } else {
         clearInterval(typingInterval);
         cursor.remove();
-        // Добавляем подпись
+        
         const fromSpan = document.createElement('span');
         fromSpan.className = 'letter-from';
         fromSpan.textContent = data.from;
         letterContent.appendChild(fromSpan);
         
-        // Показываем кнопки действий
-        actionRow.style.display = 'flex';
+        // Показываем кнопки внизу, когда текст напечатан
+        if (!isTypingDone) {
+            isTypingDone = true;
+            actionRow.classList.add('show');
+        }
       }
-    }, 50); // Скорость печати (50мс на символ)
+    }, 40);
   }
 
-  // Кнопка "Скачать картинку" (генерация на лету)
+  // Кнопка "Скачать картинку"
   downloadBtn.addEventListener('click', function() {
     if (!currentData) return;
     
-    // Создаем временный canvas для генерации красивого фото
     const canvas = document.createElement('canvas');
     canvas.width = 1080; canvas.height = 1350;
     const ctx = canvas.getContext('2d');
@@ -464,7 +504,7 @@
     link.click();
   });
 
-  // Копирование ссылки
+  // Кнопка копирования ссылки
   copyLinkBtn.addEventListener('click', function() {
     navigator.clipboard.writeText(location.href).then(() => {
       const original = copyLinkBtn.textContent;
@@ -481,7 +521,7 @@
     } else {
       createPanel.style.display = 'block';
       envelopeScene.classList.remove('active');
-      actionRow.style.display = 'none';
+      actionRow.classList.remove('show');
     }
   }
 
